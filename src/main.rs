@@ -160,8 +160,7 @@ struct DeleteOrganization {
 #[tokio::main]
 async fn main() {
     let args = Cli::parse();
-    let no_profile =
-        env::var("TRIEVE_NO_PROFILE").unwrap_or_else(|_| String::new()) == "true";
+    let no_profile = env::var("TRIEVE_NO_PROFILE").unwrap_or_else(|_| String::new()) == "true";
 
     let profiles: TrieveProfile = confy::load("trieve", "profiles")
         .map_err(|e| {
