@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/api/organization"
+  },
+  "response": {
+    "transformers": [
+      "response-template"
+    ],
+    "status": 200,
+    "jsonBody": {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "name": "Test Organization",
+      "created_at": "{{now}}",
+      "updated_at": "{{now}}",
+      "deleted": 0
+    }
+  }
+}

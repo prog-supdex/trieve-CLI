@@ -10,52 +10,10 @@ fn test_no_arguments() {
         .stderr(predicates::str::contains("Usage"));
 }
 
-#[test]
-fn test_login_with_mockito() -> Result<(), Box<dyn Error>> {
-    let mut server = mockito::Server::new();
-    let url = server.url();
-
-    // let auth_mock = server.mock("GET", "/api/auth")
-    //     .with_status(200)
-    //     .with_header("content-type", "application/json")
-    //     .with_body(r#"{"api_key":"mocked_api_key"}"#)
-    //     .create();
-
-    let user_info_mock = server
-        .mock("GET", "/api/auth/me")
-        .with_status(200)
-        .with_header("content-type", "application/json")
-        .with_body(
-            r#"{
-            "email": "mocked_user@test.com",
-            "id": "123e4567-e89b-12d3-a456-426614174000",
-            "name": "Mocked User",
-            "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z",
-            "deleted": 0,
-            "orgs": [
-                {
-                    "name": "Some Organization",
-                    "id": "123e4567-e89b-12d3-a456-426614174001",
-                    "created_at": "2024-01-01T00:00:00Z",
-                    "updated_at": "2024-01-01T00:00:00Z",
-                    "deleted": 0
-                }
-            ],
-            "user_orgs": [
-                {
-                    "created_at": "2024-01-01T00:00:00Z",
-                    "id": "123e4567-e89b-12d3-a456-426614174002",
-                    "organization_id": "123e4567-e89b-12d3-a456-426614174001",
-                    "role": 1,
-                    "updated_at": "2024-01-01T00:00:00Z",
-                    "user_id": "123e4567-e89b-12d3-a456-426614174000",
-                    "deleted": 0
-                }
-            ]
-        }"#,
-        )
-        .create();
+#[tokio::test]
+#[stubr::mock("get_me.json")]
+async fn test_login() -> Result<(), Box<dyn Error>> {
+    let base_uri = stubr.uri();
 
     let bin_path = assert_cmd::cargo::cargo_bin("trieve");
     let mut cmd = std::process::Command::new(bin_path);
@@ -68,7 +26,7 @@ fn test_login_with_mockito() -> Result<(), Box<dyn Error>> {
     process.send("n\n")?;
 
     process.exp_regex("Trieve Server URL:")?;
-    process.send_line(&url)?; // put the mock server url like a trieve server url
+    process.send_line(&base_uri)?; // put the mock server url like a trieve server url
 
     process.exp_string("Select an organization to use: ")?;
     process.send("\n")?; // select the first selected organization
@@ -81,47 +39,13 @@ fn test_login_with_mockito() -> Result<(), Box<dyn Error>> {
 
     process.exp_eof()?;
 
-    // auth_mock.assert();
-    user_info_mock.assert();
-
     Ok(())
 }
 
-#[test]
-fn test_dataset_list() {
-    let mut server = mockito::Server::new();
-    let url = server.url();
-
-    let datasets_mock = server
-        .mock(
-            "GET",
-            "/api/dataset/organization/123e4567-e89b-12d3-a456-426614174005",
-        )
-        .with_status(200)
-        .with_header("content-type", "application/json")
-        .with_body(
-            r#"[
-                {
-                    "dataset": {
-                        "client_configuration": {
-                            "key": "value"
-                        },
-                        "created_at": "2024-11-12T00:00:00",
-                        "id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
-                        "name": "Trieve",
-                        "organization_id": "123e4567-e89b-12d3-a456-426614174005",
-                        "updated_at": "2024-11-12T00:00:00",
-                        "deleted": 0
-                    },
-                    "dataset_usage": {
-                        "chunk_count": 100,
-                        "dataset_id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
-                        "id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3"
-                    }
-                }
-            ]"#,
-        )
-        .create();
+#[tokio::test]
+#[stubr::mock("dataset_list.json")]
+async fn test_dataset_list() {
+    let base_uri = stubr.uri();
 
     let output = Command::cargo_bin("trieve")
         .unwrap()
@@ -129,7 +53,7 @@ fn test_dataset_list() {
         .arg("list")
         .env("TRIEVE_NO_PROFILE", "true")
         .env("TRIEVE_API_KEY", "mocked_api_key")
-        .env("TRIEVE_API_URL", &url)
+        .env("TRIEVE_API_URL", &base_uri)
         .env("TRIEVE_ORG_ID", "123e4567-e89b-12d3-a456-426614174005")
         .assert()
         .success()
@@ -143,32 +67,12 @@ fn test_dataset_list() {
     assert!(output_str.contains("100"));
     assert!(output_str.contains("2024-11-12"));
     assert!(output_str.contains("e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3"));
-
-    datasets_mock.assert();
 }
 
-#[test]
-fn test_create_dataset() {
-    let mut server = mockito::Server::new();
-    let url = server.url();
-
-    let create_dataset_mock = server
-        .mock("POST", "/api/dataset")
-        .with_status(200)
-        .with_header("content-type", "application/json")
-        .with_body(
-            r#"{
-            "created_at": "2024-01-01T00:00:00.000",
-            "id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
-            "name": "Trieve",
-            "organization_id": "123e4567-e89b-12d3-a456-426614174001",
-            "server_configuration": {},
-            "tracking_id": "foobar-dataset",
-            "updated_at": "2024-01-01T00:00:00.000",
-            "deleted": 0
-        }"#,
-        )
-        .create();
+#[tokio::test]
+#[stubr::mock("create_dataset.json")]
+async fn test_create_dataset() {
+    let base_uri = stubr.uri();
 
     Command::cargo_bin("trieve")
         .unwrap()
@@ -178,34 +82,17 @@ fn test_create_dataset() {
         .arg("Trieve")
         .env("TRIEVE_NO_PROFILE", "true")
         .env("TRIEVE_API_KEY", "mocked_api_key")
-        .env("TRIEVE_API_URL", &url)
+        .env("TRIEVE_API_URL", &base_uri)
         .env("TRIEVE_ORG_ID", "123e4567-e89b-12d3-a456-426614174000")
         .assert()
         .success()
         .stdout(predicates::str::contains("Dataset created successfully!"));
-
-    create_dataset_mock.assert();
 }
 
-#[test]
-fn test_create_organization() {
-    let mut server = mockito::Server::new();
-    let url = server.url();
-
-    let create_organization_mock = server
-        .mock("POST", "/api/organization")
-        .with_status(200)
-        .with_header("content-type", "application/json")
-        .with_body(
-            r#"{
-            "id": "123e4567-e89b-12d3-a456-426614174000",
-            "name": "Test Organization",
-            "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z",
-            "deleted": 0
-        }"#,
-        )
-        .create();
+#[tokio::test]
+#[stubr::mock("create_organization.json")]
+async fn test_create_organization() {
+    let base_uri = stubr.uri();
 
     Command::cargo_bin("trieve")
         .unwrap()
@@ -213,13 +100,11 @@ fn test_create_organization() {
         .arg("create")
         .arg("Test Organization")
         .env("TRIEVE_API_KEY", "mocked_api_key")
-        .env("TRIEVE_API_URL", &url)
+        .env("TRIEVE_API_URL", &base_uri)
         .env("TRIEVE_NO_PROFILE", "true")
         .assert()
         .success()
         .stdout(predicates::str::contains(
             "Organization '123e4567-e89b-12d3-a456-426614174000' created.",
         ));
-
-    create_organization_mock.assert();
 }

@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/dataset/organization/123e4567-e89b-12d3-a456-426614174005"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "dataset": {
+          "client_configuration": {
+            "key": "value"
+          },
+          "created_at": "2024-11-12T00:00:00",
+          "id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
+          "name": "Trieve",
+          "organization_id": "123e4567-e89b-12d3-a456-426614174005",
+          "updated_at": "2024-11-12T00:00:00",
+          "deleted": 0
+        },
+        "dataset_usage": {
+          "chunk_count": 100,
+          "dataset_id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
+          "id": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3"
+        }
+      }
+    ]
+  }
+}

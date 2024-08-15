@@ -1,0 +1,43 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/auth/me"
+  },
+  "response": {
+    "transformers": [
+      "response-template"
+    ],
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "jsonBody": {
+      "email": "{{anyEmail}}",
+      "id":  "123e4567-e89b-12d3-a456-426614174000",
+      "name": "{{anyNonEmptyString}}",
+      "created_at": "{{now}}",
+      "updated_at": "{{now}}",
+      "deleted": 0,
+      "orgs": [
+        {
+          "name": "Some Organization",
+          "id": "123e4567-e89b-12d3-a456-426614174001",
+          "created_at": "{{now}}",
+          "updated_at": "{{now}}",
+          "deleted": 0
+        }
+      ],
+      "user_orgs": [
+        {
+          "created_at": "2024-01-01T00:00:00Z",
+          "id": "123e4567-e89b-12d3-a456-426614174002",
+          "organization_id": "123e4567-e89b-12d3-a456-426614174001",
+          "role": 1,
+          "updated_at": "2024-01-01T00:00:00Z",
+          "user_id": "123e4567-e89b-12d3-a456-426614174000",
+          "deleted": 0
+        }
+      ]
+    }
+  }
+}

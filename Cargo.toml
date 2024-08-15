@@ -32,5 +32,5 @@ predicates = "3.1.2"
 
 [dev-dependencies]
 assert_cmd = "2.0"
-mockito = "1.5.0"
 rexpect = "0.5"
+stubr = "0.6.2"
