@@ -2982,6 +2982,7 @@ dependencies = [
  "confy",
  "csv",
  "inquire",
+ "lazy_static",
  "open",
  "predicates",
  "rexpect",

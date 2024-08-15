@@ -1,6 +1,13 @@
 use assert_cmd::Command;
 use rexpect::session::spawn_command;
 use std::error::Error;
+use lazy_static::lazy_static;
+use stubr::Stubr;
+
+// Starting only one "stubr" server for all tests
+lazy_static! {
+    static ref STUBR: Stubr = stubr::Stubr::start_blocking("tests/stubs");
+}
 
 #[test]
 fn test_no_arguments() {
@@ -11,9 +18,8 @@ fn test_no_arguments() {
 }
 
 #[tokio::test]
-#[stubr::mock("get_me.json")]
 async fn test_login() -> Result<(), Box<dyn Error>> {
-    let base_uri = stubr.uri();
+    let base_uri = STUBR.uri();
 
     let bin_path = assert_cmd::cargo::cargo_bin("trieve");
     let mut cmd = std::process::Command::new(bin_path);
@@ -43,9 +49,8 @@ async fn test_login() -> Result<(), Box<dyn Error>> {
 }
 
 #[tokio::test]
-#[stubr::mock("dataset_list.json")]
 async fn test_dataset_list() {
-    let base_uri = stubr.uri();
+    let base_uri = STUBR.uri();
 
     let output = Command::cargo_bin("trieve")
         .unwrap()
@@ -70,9 +75,8 @@ async fn test_dataset_list() {
 }
 
 #[tokio::test]
-#[stubr::mock("create_dataset.json")]
 async fn test_create_dataset() {
-    let base_uri = stubr.uri();
+    let base_uri = STUBR.uri();
 
     Command::cargo_bin("trieve")
         .unwrap()
@@ -90,9 +94,8 @@ async fn test_create_dataset() {
 }
 
 #[tokio::test]
-#[stubr::mock("create_organization.json")]
 async fn test_create_organization() {
-    let base_uri = stubr.uri();
+    let base_uri = STUBR.uri();
 
     Command::cargo_bin("trieve")
         .unwrap()
